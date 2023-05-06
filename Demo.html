@@ -75,24 +75,41 @@ p {
   
   // filter: drop-shadow(2px 1.5px 1px rgba(0,0,105,0.9));
 }
+ .draggable {
+            width: 200px;
+            height: 200px;
+            background-color: lightblue;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            touch-action: pan-y;
+            user-select: none;
+        }
+
+        @media (max-width: 767px) {
+            .draggable {
+                touch-action: pan-x pan-y;
+            }
+        }
 </style>
 <div class="paper heart">
 
 </div>
 
   
-<div class="paper image draggable-image">
+<div class="paper image draggable">
   <p> and I fallen in</p>
     <p>Love with You ðŸ˜ </p>
    <img src="https://iili.io/HSzXpzg.jpg" />
 </div>
 
-<div class="paper image draggable-image">
+<div class="paper image draggable">
   <p</p>
   <img src="https://iili.io/HSzXbmF.jpg" />
 </div>
 
-<div class="paper image draggable-image">
+<div class="paper image draggable">
   <p>How can be </p>
    <p> someone so cute â¤ï¸ </p>
 
@@ -101,17 +118,17 @@ p {
 
 
 
-<div class="paper red draggable-image">
+<div class="paper red draggable">
 <p class="p1"> and My Favorite</p>
 <p class="p2">Person ðŸ˜</p>
 </div>
 
-<div class="paper draggable-image">
+<div class="paper draggable">
 <p class="p1">You are Cute </p>
   <p class="p1">Amazing <span style="color: red !important;">â¤ï¸</span></p>
 </div>
 
-<div class="paper draggable-image">
+<div class="paper draggable">
 <p class="p1">Drag the papers to move!</p>
 </div>
  <script>
@@ -198,32 +215,58 @@ papers.forEach(paper => {
   p.init(paper);
 });
  </script>
- <script>
- var draggableImage = document.querySelector('.draggable-image');
+<script>
+        var draggableElement = document.querySelector('.draggable');
+        var offsetX = 0;
+        var offsetY = 0;
+        var initialX = 0;
+        var initialY = 0;
+        var isDragging = false;
 
-// Variables to store the initial touch position and the image position
-var initialTouchX, initialTouchY;
-var initialImageX, initialImageY;
+        draggableElement.addEventListener('mousedown', startDrag);
+        draggableElement.addEventListener('touchstart', startDrag);
 
-// Function to handle touch start event
-function handleTouchStart(event) {
-  var touch = event.touches[0];
-  initialTouchX = touch.clientX;
-  initialTouchY = touch.clientY;
-  initialImageX = parseFloat(getComputedStyle(draggableImage).left);
-  initialImageY = parseFloat(getComputedStyle(draggableImage).top);
-}
+        function startDrag(e) {
+            e.preventDefault();
 
-// Function to handle touch move event
-function handleTouchMove(event) {
-  var touch = event.touches[0];
-  var offsetX = touch.clientX - initialTouchX;
-  var offsetY = touch.clientY - initialTouchY;
-  draggableImage.style.left = initialImageX + offsetX + 'px';
-  draggableImage.style.top = initialImageY + offsetY + 'px';
-}
+            if (e.type === 'touchstart') {
+                initialX = e.touches[0].clientX - offsetX;
+                initialY = e.touches[0].clientY - offsetY;
+            } else {
+                initialX = e.clientX - offsetX;
+                initialY = e.clientY - offsetY;
+            }
 
-// Add event listeners for touch events
-draggableImage.addEventListener('touchstart', handleTouchStart, false);
-draggableImage.addEventListener('touchmove', handleTouchMove, false);
- </script>
+            isDragging = true;
+
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+
+            e.preventDefault();
+
+            if (e.type === 'touchmove') {
+                offsetX = e.touches[0].clientX - initialX;
+                offsetY = e.touches[0].clientY - initialY;
+            } else {
+                offsetX = e.clientX - initialX;
+                offsetY = e.clientY - initialY;
+            }
+
+            draggableElement.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+        }
+
+        function stopDrag() {
+            isDragging = false;
+
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+    </script>
